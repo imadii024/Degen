@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DegenStore is ERC20 {
+contract Degen is ERC20 {
     struct GameItem {
         string name;
         uint256 price;
