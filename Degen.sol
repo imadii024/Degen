@@ -1,42 +1,54 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DegenToken is ERC20, Ownable {
+contract DegenStore is ERC20 {
+    struct GameItem {
+        string name;
+        uint256 price;
+    }
 
-   constructor(address initialOwner) ERC20("Degen", "DGN") Ownable(initialOwner) {}
+    mapping(uint256 => GameItem) public gameItems;
+    uint256 public totalItems;
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    constructor() ERC20("Degen", "DGN") {
+        totalItems = 0;
+    }
+
+    function mint(address to, uint256 amount) external  {
         _mint(to, amount);
     }
 
-    function decimals() public pure override returns (uint8) {
-        return 18;
+    function setItem(string memory _name, uint256 _price) external  {
+        require(_price > 0, "Invalid price");
+
+        totalItems++;
+        gameItems[totalItems] = GameItem(_name, _price);
     }
 
-    function getBalance() external view returns (uint256) {
-        return this.balanceOf(msg.sender);
+    function redeemItem(uint256 itemId) external {
+        require(itemId > 0 && itemId <= totalItems, "Invalid item ID");
+        require(balanceOf(msg.sender) >= gameItems[itemId].price, "Insufficient balance");
+
+        _transfer(msg.sender, address(this), gameItems[itemId].price);
     }
 
-    function transferTokens(address _rec, uint256 _value) external {
-        require(balanceOf(msg.sender) >= _value, "You dont have enough tokens");
-        approve(msg.sender, _value);
-        transferFrom(msg.sender, _rec, _value);
+    function getAllItems() external view returns (GameItem[] memory) {
+        GameItem[] memory items = new GameItem[](totalItems);
+        for (uint256 i = 1; i <= totalItems; i++) {
+            items[i - 1] = gameItems[i];
+        }
+        return items;
     }
 
-    function burnTokens(uint _value) external {
-        require(
-            balanceOf(msg.sender) >= _value,
-            "You dont have enough tokens to burn"
-        );
-        _burn(msg.sender, _value);
-    }
-
-    function redeemTokens(uint _value) external {
-        require(balanceOf(msg.sender) >= _value, "You dont have enough tokens");
-        approve(msg.sender, _value);
-        transferFrom(msg.sender, address(this), _value);
+   function transfer(address to, uint256 amount) public override returns (bool) {
+        _transfer(_msgSender(), to, amount);
+        return true;
+   }
+    function burn(uint256 amount) external {
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+        _burn(msg.sender, amount);
     }
 }
