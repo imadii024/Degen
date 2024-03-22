@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Points is ERC20, Ownable {
+contract Degen is ERC20, Ownable {
 
     enum Level { Level1, Level2, Level3 }
 
